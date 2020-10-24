@@ -3,7 +3,7 @@ service: sls-sqs-test
 custom:
   # Definimos variaveis de ambiente aqui também
   settings:
-    ACCOUNT_ID: '811678370367'
+    ACCOUNT_ID: "MEU_ID"
 
 provider:
   name: aws
@@ -43,6 +43,10 @@ resources:
       Properties:
         QueueName: "MyQueue"
     # END SQS
+    HealthCheckLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        RetentionInDays: 1
     LambdaRole:
       Type: AWS::IAM::Role
       Properties:
@@ -62,10 +66,10 @@ resources:
               Statement:
                 - Effect: Allow
                   Action:
-                    - 'sqs:sendMessage'
-                    - 'sqs:deleteMessage'
-                    - 'sqs:getQueueAttributes'
-                    - 'sqs:receiveMessage'
+                    - 'sqs:SendMessage'
+                    - 'sqs:ReceiveMessage'
+                    - 'sqs:DeleteMessage'
+                    - 'sqs:GetQueueAttributes'
                   Resource: 'arn:aws:sqs:${self:provider.region}:*:MyQueue'
 
 

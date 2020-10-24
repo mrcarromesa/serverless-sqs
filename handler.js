@@ -1,142 +1,48 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-AWS.config.update({
-  region: 'us-east-1',
-  accessKeyId: 'AKIA3Z66NBI753PPV6NG',
-  secretAccessKey: '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',
-});
-const sqs = new AWS.SQS({ apiVersion: '2012-11-05'});
+var sqs = new AWS.SQS({ region: 'us-east-1' });
 
 const AWS_ACCOUNT = process.env.ACCOUNT_ID;
-// https://sqs.us-east-1.amazonaws.com/811678370367/MyQueue
-// const QUEUE_URL = `https://sqs.us-east-1.amazonaws.com/${AWS_ACCOUNT}/MyQueue`;
+const QUEUE_URL = `https://sqs.us-east-1.amazonaws.com/${AWS_ACCOUNT}/MyQueue`;
 
-const QUEUE_URL = 'https://sqs.us-east-1.amazonaws.com/811678370367/MyQueue';
+module.exports.hello = (event, context, callback) => {
+	const params = {
+		MessageBody: 'Hola',
+		QueueUrl: QUEUE_URL
+	};
 
-module.exports.hello = async (event, context) => {
+	sqs.sendMessage(params, function(err, data) {
+		if (err) {
+			console.log('error:', 'Fail Send Message' + err);
 
-  const parmas = {
-    MessageBody: 'Hola',
-    QueueUrl: QUEUE_URL,
-  };
+			const response = {
+				statusCode: 500,
+				body: JSON.stringify({
+					message: 'ERROR'
+				})
+			};
 
-  console.log('1');
-  await sqs.sendMessage(parmas);
-  console.log('2');
+			callback(null, response);
+		} else {
+			console.log('data:', data.MessageId);
 
-  context.logStreamName;
+			const response = {
+				statusCode: 200,
+				body: JSON.stringify({
+					message: data.MessageId
+				})
+			};
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        message: 'asf1',
-        input: event,
-      },
-      null,
-      2
-    ),
-  };
-
-//  return sqs.sendMessage(parmas, (err, data) => {
-//   return {
-//           statusCode: 200,
-//           body: JSON.stringify(
-//             {
-//               message: 'asf',
-//             },
-//             null,
-//             2
-//           ),
-//         };
-    // try {
-
-    //   if (err) {
-    //     console.log('error: ', 'Fail send message' + err);
-    //     return {
-    //       statusCode: 500,
-    //       body: JSON.stringify(
-    //         {
-    //           message: 'Error',
-    //           input: event,
-    //         },
-    //         null,
-    //         2
-    //       ),
-    //     };
-    //   } else {
-    //     console.log('data:', data.MessageId);
-    //     return {
-    //       statusCode: 200,
-    //       body: JSON.stringify(
-    //         {
-    //           message: data.MessageId,
-    //           input: event,
-    //         },
-    //         null,
-    //         2
-    //       ),
-    //     };
-    //   }
-    // } catch (error) {
-    //   throw new Error(`error: ${error.message}`)
-    // }
-  //});
-
-  /*return {
-    statusCode: 200,
-    body: JSON.stringify(
-      {
-        message: 'aaaa',
-        input: event,
-      },
-      null,
-      2
-    ),
-  };*/
-
-  /*
-
-  
-
-  // Enviar mensagem para o sqs
-  sqs.sendMessage(parmas, (err, data) => {
-    if (err) {
-      console.log('error: ', 'Fail send message' + err);
-      return {
-        statusCode: 500,
-        body: JSON.stringify(
-          {
-            message: 'Error',
-            input: event,
-          },
-          null,
-          2
-        ),
-      };
-    } else {
-      console.log('data:', data.MessageId);
-      return {
-        statusCode: 200,
-        body: JSON.stringify(
-          {
-            message: data.MessageId,
-            input: event,
-          },
-          null,
-          2
-        ),
-      };
-    }
-  });
-  */
+			callback(null, response);
+		}
+	});
 };
 
-module.exports.sqsHello = async event => {
-  console.log('it was called');
+module.exports.sqsHello = (event, context, callback) => {
+	console.log('it was called');
 
-  console.log(event);
+	console.log(event);
 
-  return 'ok!';
+	context.done(null, '');
 };
